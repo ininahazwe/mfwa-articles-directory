@@ -465,7 +465,7 @@ export default function WordPressPostsTable() {
                   Titre
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  CatÃ©gories & Pays
+                  Catégories & Pays
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Date

@@ -71,7 +71,7 @@ export default function WordPressPostsTable() {
           'https://mfwa.org/wp-json/wp/v2/publication'
         ];
         
-        // Charger catÃ©gories et tags + seulement 10 premiers articles
+        // Charger catégories et tags + seulement 10 premiers articles
         const [categoriesResponse, tagsResponse, countriesResponse, firstBatchResponse] = await Promise.all([
           fetch('https://mfwa.org/wp-json/wp/v2/categories?per_page=100'),
           fetch('https://mfwa.org/wp-json/wp/v2/tags?per_page=100'),
@@ -260,7 +260,7 @@ export default function WordPressPostsTable() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Titre</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">CatÃ©gories</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Catégories</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Extrait</th>
                 <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Lien</th>
@@ -378,7 +378,7 @@ export default function WordPressPostsTable() {
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="w-full px-4 py-2 bg-white rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none appearance-none"
               >
-                <option value="all">Toutes les catÃ©gories</option>
+                <option value="all">Toutes les catégories</option>
                 {Object.entries(categories).map(([id, name]) => (
                   <option key={id} value={id}>{name}</option>
                 ))}

@@ -19,8 +19,112 @@
   }
 }
 
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SFPRODISPLAYREGULAR.OTF') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SFPRODISPLAYMEDIUM.OTF') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SFPRODISPLAYBOLD.OTF') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SFPRODISPLAYLIGHTITALIC.OTF') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SFPRODISPLAYHEAVYITALIC.OTF') format('opentype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.header-container {
+  border-bottom: 2px solid #f3f3f3;
+  text-align: center;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px;
+  align-items: center;
+}
+
+.logo-text {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+h1 {
+  font-family: 'SF Pro Display', sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.icon-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+}
+
+.icon-circle {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background-color: #4A90E2; /* Choisissez votre couleur */
+  border-radius: 50%;
+  bottom: -10px;
+  left: -10px;
+  z-index: -1;
+  opacity: 0.6; /* Légère transparence */
+}
+
+.icon-wrapper i {
+  position: relative;
+  font-size: 40px;
+  color: #333;
+  z-index: 1;
+}
+
+.tableau {
+  border-left: 2px solid #f3f3f3;
+  border-right: 2px solid #f3f3f3;
+}
+
+.results-count {
+  font-size: 1rem;
+  color: #666;
+  background: #fad4b8;
+  padding: 10px 20px;
+  border-radius: 20px;
 }

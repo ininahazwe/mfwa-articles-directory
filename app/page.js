@@ -417,7 +417,7 @@ export default function WordPressPostsTable() {
               <span className="text-sm text-gray-600">Filtres actifs:</span>
               {searchTerm && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
-                  Recherche: "{searchTerm}"
+                  {`Recherche: "${searchTerm}"`}
                   <button onClick={() => setSearchTerm('')} className="hover:text-gray-900">
                     <X className="w-3 h-3" />
                   </button>
@@ -579,7 +579,7 @@ export default function WordPressPostsTable() {
 
           {filteredPosts.length === 0 && (
             <div className="text-center py-12 bg-gray-50">
-              <p className="text-gray-500">Aucun article ne correspond Ã  vos critÃ¨res de recherche.</p>
+              <p className="text-gray-500">Aucun article ne correspond à vos critères de recherche.</p>
             </div>
           )}
         </div>

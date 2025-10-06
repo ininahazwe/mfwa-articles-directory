@@ -368,7 +368,7 @@ export default function WordPressPostsTable() {
                 <option value="all">Toutes les dates</option>
                 <option value="week">Cette semaine</option>
                 <option value="month">Ce mois</option>
-                <option value="year">Cette annÃ©e</option>
+                <option value="year">Cette année</option>
               </select>
             </div>
 
@@ -596,7 +596,7 @@ export default function WordPressPostsTable() {
                 className="inline-flex items-center px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
-                PrÃ©cÃ©dent
+                Précédent
               </button>
               
               <div className="flex gap-1">

@@ -1,24 +1,22 @@
 'use client';
 
-import { X, Calendar, Globe } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 
 export default function ActiveFilters({ 
   searchTerm, 
   dateFilterLabel, 
   categoryFilter, 
   tagFilter, 
-  countryFilter, 
   categories, 
   tags, 
-  countries, 
   onClearSearch, 
   onClearDate, 
   onClearCategory, 
   onClearTag, 
-  onClearCountry, 
   onClearAll 
 }) {
-  const hasActiveFilters = searchTerm || dateFilterLabel || categoryFilter !== 'all' || tagFilter !== 'all' || countryFilter !== 'all';
+  // Mise à jour de la condition de présence de filtres actifs
+  const hasActiveFilters = searchTerm || dateFilterLabel || categoryFilter !== 'all' || tagFilter !== 'all';
 
   if (!hasActiveFilters) return null;
 
@@ -58,16 +56,6 @@ export default function ActiveFilters({
         <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
           {tags[tagFilter]}
           <button onClick={onClearTag} className="hover:text-gray-900">
-            <X className="w-3 h-3" />
-          </button>
-        </span>
-      )}
-      
-      {countryFilter !== 'all' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-          <Globe className="w-3 h-3" />
-          {countries[countryFilter]}
-          <button onClick={onClearCountry} className="hover:text-blue-900">
             <X className="w-3 h-3" />
           </button>
         </span>

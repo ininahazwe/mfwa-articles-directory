@@ -1,81 +1,59 @@
 'use client';
 
-import { X, Calendar, Globe } from 'lucide-react';
+import TableRow from './TableRow';
 
-export default function ActiveFilters({ 
-  searchTerm, 
-  dateFilterLabel, 
-  categoryFilter, 
-  tagFilter, 
-  countryFilter, 
+export default function ArticlesTable({ 
+  posts, 
   categories, 
   tags, 
-  countries, 
-  onClearSearch, 
-  onClearDate, 
-  onClearCategory, 
-  onClearTag, 
-  onClearCountry, 
-  onClearAll 
+  copiedId, 
+  onCategoryClick, 
+  onTagClick, 
+  onCopyLink, 
+  formatDate, 
+  stripHtml 
 }) {
-  const hasActiveFilters = searchTerm || dateFilterLabel || categoryFilter !== 'all' || tagFilter !== 'all' || countryFilter !== 'all';
-
-  if (!hasActiveFilters) return null;
-
   return (
-    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-200">
-      <span className="text-sm text-gray-600">Active filters:</span>
-      
-      {searchTerm && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
-          Search: &ldquo;{searchTerm}&rdquo;
-          <button onClick={onClearSearch} className="hover:text-gray-900">
-            <X className="w-3 h-3" />
-          </button>
-        </span>
-      )}
-      
-      {dateFilterLabel && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">
-          <Calendar className="w-3 h-3" />
-          {dateFilterLabel}
-          <button onClick={onClearDate} className="hover:text-orange-900">
-            <X className="w-3 h-3" />
-          </button>
-        </span>
-      )}
-      
-      {categoryFilter !== 'all' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
-          {categories[categoryFilter]}
-          <button onClick={onClearCategory} className="hover:text-gray-900">
-            <X className="w-3 h-3" />
-          </button>
-        </span>
-      )}
-      
-      {tagFilter !== 'all' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
-          {tags[tagFilter]}
-          <button onClick={onClearTag} className="hover:text-gray-900">
-            <X className="w-3 h-3" />
-          </button>
-        </span>
-      )}
-      
-      {countryFilter !== 'all' && (
-        <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-          <Globe className="w-3 h-3" />
-          {countries[countryFilter]}
-          <button onClick={onClearCountry} className="hover:text-blue-900">
-            <X className="w-3 h-3" />
-          </button>
-        </span>
-      )}
-      
-      <button onClick={onClearAll} className="text-sm text-gray-600 hover:text-gray-900 underline ml-2">
-        Clear all
-      </button>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-200">
+              <th className="px-6 py-4 text-sm font-semibold text-gray-900">Article</th>
+              <th className="px-6 py-4 text-sm font-semibold text-gray-900">Categories</th>
+              <th className="px-6 py-4 text-sm font-semibold text-gray-900">Date</th>
+              <th className="px-6 py-4 text-sm font-semibold text-gray-900">Excerpt</th>
+              <th className="px-6 py-4 text-sm font-semibold text-gray-900 text-center">Share</th>
+              <th className="px-6 py-4 text-sm font-semibold text-gray-900">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {posts.length > 0 ? (
+              posts.map((post, index) => (
+                <TableRow
+                  key={post.id}
+                  post={post}
+                  index={index}
+                  categories={categories}
+                  tags={tags}
+                  copiedId={copiedId}
+                  onCategoryClick={onCategoryClick}
+                  onTagClick={onTagClick}
+                  onCopyLink={onCopyLink}
+                  formatDate={formatDate}
+                  stripHtml={stripHtml}
+                />
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                  No articles found matching your criteria.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

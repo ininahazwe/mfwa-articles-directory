@@ -7,11 +7,9 @@ export default function TableRow({
   index, 
   categories, 
   tags, 
-  countries, 
   copiedId, 
   onCategoryClick, 
   onTagClick, 
-  onCountryClick, 
   onCopyLink, 
   formatDate, 
   stripHtml 
@@ -54,19 +52,7 @@ export default function TableRow({
             </button>
           ))}
         </div>
-        {post.country && post.country.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {post.country.map(countryId => countries[countryId] && (
-              <button 
-                key={countryId} 
-                onClick={() => onCountryClick(countryId)} 
-                className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-600 text-white hover:bg-blue-500 transition-colors cursor-pointer"
-              >
-                {countries[countryId]}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Le bloc "country" a été supprimé ici */}
       </td>
       
       <td className="px-6 py-4 whitespace-nowrap">

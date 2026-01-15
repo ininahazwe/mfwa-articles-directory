@@ -1,10 +1,25 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Calendar, X, ChevronLeft, ChevronRight, Copy, Check, TrendingUp, Globe, FileText, BarChart3 } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart3 } from 'lucide-react';
 import "@flaticon/flaticon-uicons/css/all/all.css";
 import './globals.css';
+
+// Analytics Components
+import KPICards from './components/Analytics/KPICards';
+import TimelineChart from './components/Analytics/TimelineChart';
+import CountriesChart from './components/Analytics/CountriesChart';
+
+// Filter Components
+import SearchBar from './components/Filters/SearchBar';
+import SelectFilters from './components/Filters/SelectFilters';
+import DateFilters from './components/Filters/DateFilters';
+import ActiveFilters from './components/Filters/ActiveFilters';
+
+// Table Components
+import ArticlesTable from './components/Table/ArticlesTable';
+import Pagination from './components/Pagination';
+import SkeletonLoader from './components/SkeletonLoader';
 
 export default function WordPressPostsTable() {
   const [posts, setPosts] = useState([]);
@@ -26,6 +41,7 @@ export default function WordPressPostsTable() {
   const [showCharts, setShowCharts] = useState(true);
   const itemsPerPage = 10;
 
+  // ========== DATA FETCHING ==========
   useEffect(() => {
     const fetchFirstPage = async (endpoint) => {
       try {
@@ -124,6 +140,7 @@ export default function WordPressPostsTable() {
     fetchData();
   }, []);
 
+  // ========== UTILITY FUNCTIONS ==========
   const stripHtml = (html) => {
     const tmp = document.createElement('DIV');
     tmp.innerHTML = html;
@@ -145,6 +162,7 @@ export default function WordPressPostsTable() {
     }
   };
 
+  // ========== DATE HANDLING ==========
   const applyDatePreset = (preset) => {
     setDatePreset(preset);
     const now = new Date();
@@ -187,6 +205,16 @@ export default function WordPressPostsTable() {
     setDatePreset('custom');
   };
 
+  const getDateFilterLabel = () => {
+    if (!startDate && !endDate) return null;
+    const formatDateShort = (dateStr) => new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (startDate && endDate) return `${formatDateShort(startDate)} - ${formatDateShort(endDate)}`;
+    if (startDate) return `From ${formatDateShort(startDate)}`;
+    if (endDate) return `Until ${formatDateShort(endDate)}`;
+    return null;
+  };
+
+  // ========== FILTERING ==========
   const filteredPosts = posts.filter(post => {
     const title = post?.title?.rendered ? stripHtml(post.title.rendered).toLowerCase() : '';
     const matchesSearch = title.includes(searchTerm.toLowerCase());
@@ -211,6 +239,7 @@ export default function WordPressPostsTable() {
     return matchesSearch && matchesCategory && matchesTag && matchesCountry && matchesDate;
   });
 
+  // ========== ANALYTICS ==========
   const analyticsData = useMemo(() => {
     const now = new Date();
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -267,15 +296,16 @@ export default function WordPressPostsTable() {
     return { totalArticles: filteredPosts.length, articlesThisMonth, topCountry, topCountryCount, topCategory, topCategoryCount, timelineData, countriesChartData };
   }, [filteredPosts, countries, categories]);
 
+  // ========== PAGINATION ==========
   const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
   const paginatedPosts = filteredPosts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => { setCurrentPage(1); }, [searchTerm, startDate, endDate, categoryFilter, tagFilter, countryFilter]);
 
-  const handleCategoryClick = (catId) => { setCategoryFilter(catId.toString()); };
-  const handleTagClick = (tagId) => { setTagFilter(tagId.toString()); };
-  const handleCountryClick = (countryId) => { setCountryFilter(countryId.toString()); };
-  const handleCountryBarClick = (data) => { if (data && data.id) setCountryFilter(data.id.toString()); };
+  // ========== EVENT HANDLERS ==========
+  const handleCategoryClick = (catId) => setCategoryFilter(catId.toString());
+  const handleTagClick = (tagId) => setTagFilter(tagId.toString());
+  const handleCountryClick = (countryId) => setCountryFilter(countryId.toString());
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -296,85 +326,7 @@ export default function WordPressPostsTable() {
 
   const hasActiveFilters = searchTerm || startDate || endDate || categoryFilter !== 'all' || tagFilter !== 'all' || countryFilter !== 'all';
 
-  const getDateFilterLabel = () => {
-    if (!startDate && !endDate) return null;
-    const formatDateShort = (dateStr) => new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-    if (startDate && endDate) return `${formatDateShort(startDate)} - ${formatDateShort(endDate)}`;
-    if (startDate) return `From ${formatDateShort(startDate)}`;
-    if (endDate) return `Until ${formatDateShort(endDate)}`;
-    return null;
-  };
-
-  const CHART_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white px-3 py-2 shadow-lg rounded-lg border border-gray-200">
-          <p className="text-sm font-medium text-gray-900">{label}</p>
-          <p className="text-sm text-gray-600">{payload[0].value} articles</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const BarTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white px-3 py-2 shadow-lg rounded-lg border border-gray-200">
-          <p className="text-sm font-medium text-gray-900">{payload[0].payload.name}</p>
-          <p className="text-sm text-gray-600">{payload[0].value} articles</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const SkeletonLoader = () => (
-    <div className="min-h-screen">
-      <div className="header-container">
-        <div className="header-content">
-          <div className="logo-text">
-            <div className="icon-wrapper">
-              <div className="icon-circle"></div>
-              <i className="fi fi-rr-book-alt"></i>
-            </div>
-            <h1>Articles Directory</h1>
-          </div>
-          <div className="results-count">
-            <div className="animate-pulse bg-gray-300 h-6 w-32 rounded"></div>
-          </div>
-        </div>
-      </div>
-      <div className="tableau max-w-7xl mx-auto px-8 py-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl p-4 border border-gray-100">
-              <div className="animate-pulse bg-gray-200 h-4 w-24 rounded mb-2"></div>
-              <div className="animate-pulse bg-gray-300 h-8 w-16 rounded"></div>
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl p-4 border border-gray-100">
-              <div className="animate-pulse bg-gray-200 h-4 w-40 rounded mb-4"></div>
-              <div className="animate-pulse bg-gray-100 h-48 rounded"></div>
-            </div>
-          ))}
-        </div>
-        <div className="bg-gray-50 rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-gray-300 h-10 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
+  // ========== RENDER ==========
   if (loading) return <SkeletonLoader />;
 
   if (error) {
@@ -390,6 +342,7 @@ export default function WordPressPostsTable() {
 
   return (
     <div className="min-h-screen">
+      {/* Header */}
       <div className="header-container">
         <div className="header-content">
           <div className="logo-text">
@@ -420,79 +373,12 @@ export default function WordPressPostsTable() {
             </button>
           </div>
 
-          {/* KPI Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl p-4 border border-gray-100 hover:border-gray-200 transition-colors">
-              <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
-                <FileText className="w-4 h-4" />
-                Total Articles
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{analyticsData.totalArticles}</div>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-100 hover:border-gray-200 transition-colors">
-              <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
-                <TrendingUp className="w-4 h-4" />
-                This Month
-              </div>
-              <div className="text-2xl font-bold text-green-600">{analyticsData.articlesThisMonth}</div>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-100 hover:border-gray-200 transition-colors">
-              <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
-                <Globe className="w-4 h-4" />
-                Top Country
-              </div>
-              <div className="text-lg font-bold text-blue-600 truncate" title={analyticsData.topCountry}>{analyticsData.topCountry}</div>
-              <div className="text-xs text-gray-400">{analyticsData.topCountryCount} articles</div>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-100 hover:border-gray-200 transition-colors">
-              <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
-                <FileText className="w-4 h-4" />
-                Top Category
-              </div>
-              <div className="text-lg font-bold text-purple-600 truncate" title={analyticsData.topCategory}>{analyticsData.topCategory}</div>
-              <div className="text-xs text-gray-400">{analyticsData.topCategoryCount} articles</div>
-            </div>
-          </div>
+          <KPICards analyticsData={analyticsData} />
 
-          {/* Charts */}
           {showCharts && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl p-4 border border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">Publications Timeline (12 months)</h3>
-                <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={analyticsData.timelineData}>
-                    <defs>
-                      <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
-                    <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} width={30} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="count" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#colorCount)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="bg-white rounded-xl p-4 border border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">Top Countries</h3>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={analyticsData.countriesChartData} layout="vertical" margin={{ left: 10, right: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={true} vertical={false} />
-                    <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} width={80} />
-                    <Tooltip content={<BarTooltip />} />
-                    <Bar dataKey="count" radius={[0, 4, 4, 0]} cursor="pointer" onClick={(data) => handleCountryBarClick(data)}>
-                      {analyticsData.countriesChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} className="hover:opacity-80 transition-opacity" />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-                <p className="text-xs text-gray-400 mt-2 text-center">Click on a bar to filter by country</p>
-              </div>
+              <TimelineChart data={analyticsData.timelineData} />
+              <CountriesChart data={analyticsData.countriesChartData} onCountryClick={handleCountryClick} />
             </div>
           )}
         </div>
@@ -500,172 +386,69 @@ export default function WordPressPostsTable() {
         {/* Filters Section */}
         <div className="bg-gray-50 rounded-lg p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-white rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none" />
-            </div>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="w-full px-4 py-2 bg-white rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none appearance-none">
-              <option value="all">All categories</option>
-              {Object.entries(categories).map(([id, name]) => (<option key={id} value={id}>{name}</option>))}
-            </select>
-            <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} className="w-full px-4 py-2 bg-white rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none appearance-none">
-              <option value="all">All tags</option>
-              {Object.entries(tags).map(([id, name]) => (<option key={id} value={id}>{name}</option>))}
-            </select>
-            <select value={countryFilter} onChange={(e) => setCountryFilter(e.target.value)} className="w-full px-4 py-2 bg-white rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none appearance-none">
-              <option value="all">All countries</option>
-              {Object.entries(countries).map(([id, name]) => (<option key={id} value={id}>{name}</option>))}
-            </select>
+            <SearchBar value={searchTerm} onChange={setSearchTerm} />
+            <SelectFilters
+              categories={categories}
+              tags={tags}
+              countries={countries}
+              categoryFilter={categoryFilter}
+              tagFilter={tagFilter}
+              countryFilter={countryFilter}
+              onCategoryChange={setCategoryFilter}
+              onTagChange={setTagFilter}
+              onCountryChange={setCountryFilter}
+            />
           </div>
 
-          <div className="border-t border-gray-200 pt-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="w-4 h-4" />
-                <span className="font-medium">Period:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[{ value: 'all', label: 'All' }, { value: 'week', label: '7 days' }, { value: 'month', label: '30 days' }, { value: '3months', label: '3 months' }, { value: '6months', label: '6 months' }, { value: 'year', label: '1 year' }].map((preset) => (
-                  <button key={preset.value} onClick={() => applyDatePreset(preset.value)} className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${datePreset === preset.value ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}>{preset.label}</button>
-                ))}
-              </div>
-              <div className="hidden lg:block w-px h-8 bg-gray-300 mx-2"></div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">or</span>
-                <input type="date" value={startDate} onChange={(e) => handleStartDateChange(e.target.value)} className="px-3 py-1.5 text-sm bg-white rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none" />
-                <span className="text-gray-400">→</span>
-                <input type="date" value={endDate} onChange={(e) => handleEndDateChange(e.target.value)} className="px-3 py-1.5 text-sm bg-white rounded-lg focus:ring-2 focus:ring-gray-900 focus:outline-none" />
-              </div>
-            </div>
-          </div>
+          <DateFilters
+            datePreset={datePreset}
+            startDate={startDate}
+            endDate={endDate}
+            onPresetChange={applyDatePreset}
+            onStartDateChange={handleStartDateChange}
+            onEndDateChange={handleEndDateChange}
+          />
 
-          {hasActiveFilters && (
-            <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-200">
-              <span className="text-sm text-gray-600">Active filters:</span>
-              {searchTerm && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
-                  Search: &ldquo;{searchTerm}&rdquo;
-                  <button onClick={() => setSearchTerm('')} className="hover:text-gray-900"><X className="w-3 h-3" /></button>
-                </span>
-              )}
-              {getDateFilterLabel() && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">
-                  <Calendar className="w-3 h-3" />{getDateFilterLabel()}
-                  <button onClick={clearDateFilter} className="hover:text-orange-900"><X className="w-3 h-3" /></button>
-                </span>
-              )}
-              {categoryFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
-                  {categories[categoryFilter]}
-                  <button onClick={() => setCategoryFilter('all')} className="hover:text-gray-900"><X className="w-3 h-3" /></button>
-                </span>
-              )}
-              {tagFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
-                  {tags[tagFilter]}
-                  <button onClick={() => setTagFilter('all')} className="hover:text-gray-900"><X className="w-3 h-3" /></button>
-                </span>
-              )}
-              {countryFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  <Globe className="w-3 h-3" />{countries[countryFilter]}
-                  <button onClick={() => setCountryFilter('all')} className="hover:text-blue-900"><X className="w-3 h-3" /></button>
-                </span>
-              )}
-              <button onClick={clearFilters} className="text-sm text-gray-600 hover:text-gray-900 underline ml-2">Clear all</button>
-            </div>
-          )}
+          <ActiveFilters
+            searchTerm={searchTerm}
+            dateFilterLabel={getDateFilterLabel()}
+            categoryFilter={categoryFilter}
+            tagFilter={tagFilter}
+            countryFilter={countryFilter}
+            categories={categories}
+            tags={tags}
+            countries={countries}
+            onClearSearch={() => setSearchTerm('')}
+            onClearDate={clearDateFilter}
+            onClearCategory={() => setCategoryFilter('all')}
+            onClearTag={() => setTagFilter('all')}
+            onClearCountry={() => setCountryFilter('all')}
+            onClearAll={clearFilters}
+          />
         </div>
 
         {/* Table Section */}
-        <div className="bg-white overflow-hidden mb-8">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Categories & Countries</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Excerpt</th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Link</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Action</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {paginatedPosts.map((post, index) => (
-                <tr key={post.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900 mb-2">{stripHtml(post.title.rendered)}</div>
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {post.tags.slice(0, 3).map(tagId => tags[tagId] && (
-                          <button key={tagId} onClick={() => handleTagClick(tagId)} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer">{tags[tagId]}</button>
-                        ))}
-                        {post.tags.length > 3 && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">+{post.tags.length - 3}</span>}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {post.categories && post.categories.map(catId => categories[catId] && (
-                        <button key={catId} onClick={() => handleCategoryClick(catId)} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-900 text-white hover:bg-gray-700 transition-colors cursor-pointer">{categories[catId]}</button>
-                      ))}
-                    </div>
-                    {post.country && post.country.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {post.country.map(countryId => countries[countryId] && (
-                          <button key={countryId} onClick={() => handleCountryClick(countryId)} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-600 text-white hover:bg-blue-500 transition-colors cursor-pointer">{countries[countryId]}</button>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap"><div className="text-sm text-gray-600">{formatDate(post.date)}</div></td>
-                  <td className="px-6 py-4"><div className="text-sm text-gray-600 line-clamp-2">{stripHtml(post?.excerpt?.rendered || '')}</div></td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <button onClick={() => copyToClipboard(post.link, post.id)} className="inline-flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Copy link">
-                      {copiedId === post.id ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <a href={post.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">Read</a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {filteredPosts.length === 0 && (
-            <div className="text-center py-12 bg-gray-50">
-              <p className="text-gray-500">No articles match your search criteria.</p>
-            </div>
-          )}
-        </div>
+        <ArticlesTable
+          posts={paginatedPosts}
+          categories={categories}
+          tags={tags}
+          countries={countries}
+          copiedId={copiedId}
+          onCategoryClick={handleCategoryClick}
+          onTagClick={handleTagClick}
+          onCountryClick={handleCountryClick}
+          onCopyLink={copyToClipboard}
+          formatDate={formatDate}
+          stripHtml={stripHtml}
+        />
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between bg-gray-50 px-6 py-4 rounded-lg">
-            <div className="text-sm text-gray-600">Page {currentPage} of {totalPages} ({filteredPosts.length} articles)</div>
-            <div className="flex gap-2">
-              <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="inline-flex items-center px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                <ChevronLeft className="w-4 h-4 mr-1" />Previous
-              </button>
-              <div className="flex gap-1">
-                {[...Array(totalPages)].map((_, idx) => {
-                  const pageNum = idx + 1;
-                  if (pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)) {
-                    return (
-                      <button key={pageNum} onClick={() => setCurrentPage(pageNum)} className={`px-3 py-2 rounded-lg transition-colors ${currentPage === pageNum ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}>{pageNum}</button>
-                    );
-                  } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
-                    return <span key={pageNum} className="px-2 py-2">...</span>;
-                  }
-                  return null;
-                })}
-              </div>
-              <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="inline-flex items-center px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                Next<ChevronRight className="w-4 h-4 ml-1" />
-              </button>
-            </div>
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredPosts.length}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

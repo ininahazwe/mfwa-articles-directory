@@ -544,7 +544,7 @@ export default function WordPressPostsTable() {
               <span className="text-sm text-gray-600">Active filters:</span>
               {searchTerm && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-white rounded-full text-sm">
-                  Search: "{searchTerm}"
+                  Search: &ldquo;{searchTerm}&rdquo;
                   <button onClick={() => setSearchTerm('')} className="hover:text-gray-900"><X className="w-3 h-3" /></button>
                 </span>
               )}
